@@ -2,6 +2,7 @@
 using Ecommerce_V1.Interfaces;
 using Ecommerce_V1.Models;
 using Ecommerce_V1.Models.DTO.Products;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce_V1.Services
@@ -17,22 +18,28 @@ namespace Ecommerce_V1.Services
 
         public async Task<List<GetAllProducts>> GetAllProducts()
         {
-            var products = await _context.Products.ToListAsync();
-            return products.Select(p => new GetAllProducts
-            {
-                Id = p.Id,
-                Sku = p.Sku,
-                Name = p.Name,
-                Description = p.Description,
-                PriceAmount = p.PriceAmount,
-                PriceCurrency = p.PriceCurrency,
-                IsActive = p.IsActive
-            }).ToList();
+            return await _context.Products
+                .AsNoTracking()
+                .Where(p => p.IsActive)
+                .Select(p => new GetAllProducts
+                {
+                    Id = p.Id,
+                    Sku = p.Sku,
+                    Name = p.Name,
+                    Description = p.Description,
+                    PriceAmount = p.PriceAmount,
+                    PriceCurrency = p.PriceCurrency,
+                    IsActive = p.IsActive
+                })
+                .ToListAsync();
         }
 
-        public async Task<GetByIdProduct> GetProductById(Guid id)
+        public async Task<GetByIdProduct?> GetProductById(Guid id)
         {
-            var productById = await _context.Products.FindAsync(id);
+            var productById = await _context.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (productById == null)
             {
                 return null;
@@ -48,12 +55,18 @@ namespace Ecommerce_V1.Services
                 PriceCurrency = productById.PriceCurrency,
                 IsActive = productById.IsActive
             };
-
-
         }
 
         public async Task<GetByIdProduct> CreateProduct(CreateProduct product)
         {
+            var skuAlreadyExists = await _context.Products
+                .AnyAsync(p => p.Sku == product.Sku);
+
+            if (skuAlreadyExists)
+            {
+                throw new DuplicateSkuException();
+            }
+
             var newProduct = new Product
             {
                 Id = Guid.NewGuid(),
@@ -62,10 +75,19 @@ namespace Ecommerce_V1.Services
                 Description = product.Description,
                 PriceAmount = product.PriceAmount,
                 PriceCurrency = product.PriceCurrency,
-                IsActive = product.IsActive
+                IsActive = true
             };
+
             _context.Products.Add(newProduct);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (IsDuplicateSku(ex))
+            {
+                throw new DuplicateSkuException(ex);
+            }
 
             return new GetByIdProduct
             {
@@ -77,6 +99,13 @@ namespace Ecommerce_V1.Services
                 PriceCurrency = newProduct.PriceCurrency,
                 IsActive = newProduct.IsActive
             };
+        }
+
+        // 2601: duplicate key on a unique index. 2627: unique constraint violation.
+        private static bool IsDuplicateSku(DbUpdateException ex)
+        {
+            return ex.InnerException is SqlException sqlException
+                && (sqlException.Number == 2601 || sqlException.Number == 2627);
         }
     }
 }

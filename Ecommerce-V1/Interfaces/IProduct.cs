@@ -5,7 +5,7 @@ namespace Ecommerce_V1.Interfaces
     public interface IProduct
     {
         Task<List<GetAllProducts>> GetAllProducts();
-        Task<GetByIdProduct> GetProductById(Guid id);
+        Task<GetByIdProduct?> GetProductById(Guid id);
         Task<GetByIdProduct> CreateProduct(CreateProduct product);
 
     }
