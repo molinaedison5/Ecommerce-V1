@@ -1,6 +1,23 @@
-@Ecommerce_V1_HostAddress = http://localhost:44374
+@Ecommerce_V1_HostAddress = http://localhost:5208
 
-GET http://localhost:44374/api/Product
+GET {{Ecommerce_V1_HostAddress}}/api/Product
 Accept: application/json
 
 ###
+
+GET {{Ecommerce_V1_HostAddress}}/api/Product/3fa85f64-5717-4562-b3fc-2c963f66afa6
+Accept: application/json
+
+###
+
+POST {{Ecommerce_V1_HostAddress}}/api/Product
+Content-Type: application/json
+Accept: application/json
+
+{
+  "sku": "PET-SHAMPOO-250",
+  "name": "Gentle pet shampoo",
+  "description": "Mild shampoo for dogs and cats. 250 ml.",
+  "priceAmount": 12.50,
+  "priceCurrency": "USD"
+}

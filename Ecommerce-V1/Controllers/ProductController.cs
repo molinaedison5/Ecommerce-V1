@@ -9,9 +9,9 @@ namespace Ecommerce_V1.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ProductService _productService;
+        private readonly IProduct _productService;
 
-        public ProductController(ProductService productService)
+        public ProductController(IProduct productService)
         {
             _productService = productService;
         }
@@ -23,7 +23,7 @@ namespace Ecommerce_V1.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
             var product = await _productService.GetProductById(id);
@@ -37,8 +37,15 @@ namespace Ecommerce_V1.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProduct product)
         {
-            var createdProduct = await _productService.CreateProduct(product);
-            return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+            try
+            {
+                var createdProduct = await _productService.CreateProduct(product);
+                return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+            }
+            catch (DuplicateSkuException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
     }
 }
