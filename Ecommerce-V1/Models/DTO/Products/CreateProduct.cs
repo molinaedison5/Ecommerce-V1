@@ -17,7 +17,9 @@ namespace Ecommerce_V1.Models.DTO.Products
         public string Description { get; set; } = null!;
 
         // decimal(12,2): greater than 0, at most 10 digits before the decimal point.
-        [Range(typeof(decimal), "0.01", "9999999999.99")]
+        [Range(typeof(decimal), "0.01", "9999999999.99", 
+            ParseLimitsInInvariantCulture = true, 
+            ConvertValueInInvariantCulture = true)]
         public decimal PriceAmount { get; set; }
 
         [Required]

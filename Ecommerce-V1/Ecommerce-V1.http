@@ -15,9 +15,9 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "sku": "PET-SHAMPOO-250",
-  "name": "Gentle pet shampoo",
-  "description": "Mild shampoo for dogs and cats. 250 ml.",
-  "priceAmount": 12.50,
+  "sku": "CAT-LITTER-010",
+  "name": "Arena aglomerante para gato 10kg",
+  "description": "Arena sin aroma, alta absorción y control de olores",
+  "priceAmount": 18.90,
   "priceCurrency": "USD"
 }
