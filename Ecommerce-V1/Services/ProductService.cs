@@ -101,6 +101,66 @@ namespace Ecommerce_V1.Services
             };
         }
 
+        public async Task<GetByIdProduct?> UpdateProduct(Guid id, UpdateProduct product)
+        {
+            var existingProduct = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+
+            if (existingProduct == null)
+            {
+                return null;
+            }
+
+            var skuAlreadyExists = await _context.Products
+                .AnyAsync(p => p.Sku == product.Sku && p.Id != id);
+
+            if (skuAlreadyExists)
+            {
+                throw new DuplicateSkuException();
+            }
+
+            existingProduct.Sku = product.Sku;
+            existingProduct.Name = product.Name;
+            existingProduct.Description = product.Description;
+            existingProduct.PriceAmount = product.PriceAmount;
+            existingProduct.PriceCurrency = product.PriceCurrency;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (IsDuplicateSku(ex))
+            {
+                throw new DuplicateSkuException(ex);
+            }
+
+            return new GetByIdProduct
+            {
+                Id = existingProduct.Id,
+                Sku = existingProduct.Sku,
+                Name = existingProduct.Name,
+                Description = existingProduct.Description,
+                PriceAmount = existingProduct.PriceAmount,
+                PriceCurrency = existingProduct.PriceCurrency,
+                IsActive = existingProduct.IsActive
+            };
+        }
+
+        public async Task<bool> DeleteProduct(Guid id)
+        {
+            var existingProduct = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+
+            if (existingProduct == null)
+            {
+                return false;
+            }
+
+            existingProduct.IsActive = false;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         // 2601: duplicate key on a unique index. 2627: unique constraint violation.
         private static bool IsDuplicateSku(DbUpdateException ex)
         {
