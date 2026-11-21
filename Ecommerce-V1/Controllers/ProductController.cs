@@ -47,5 +47,36 @@ namespace Ecommerce_V1.Controllers
                 return Conflict(new { message = ex.Message });
             }
         }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProduct product)
+        {
+            try
+            {
+                var updatedProduct = await _productService.UpdateProduct(id, product);
+                if (updatedProduct == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updatedProduct);
+            }
+            catch (DuplicateSkuException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteProduct(Guid id)
+        {
+            var deleted = await _productService.DeleteProduct(id);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }

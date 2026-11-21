@@ -21,3 +21,22 @@ Accept: application/json
   "priceAmount": 18.90,
   "priceCurrency": "USD"
 }
+
+###
+
+PUT {{Ecommerce_V1_HostAddress}}/api/Product/3fa85f64-5717-4562-b3fc-2c963f66afa6
+Content-Type: application/json
+Accept: application/json
+
+{
+  "sku": "CAT-LITTER-010",
+  "name": "Arena aglomerante para gato 10kg",
+  "description": "Arena sin aroma, alta absorción y control de olores. Presentación 10 kg.",
+  "priceAmount": 19.50,
+  "priceCurrency": "USD"
+}
+
+###
+
+DELETE {{Ecommerce_V1_HostAddress}}/api/Product/3fa85f64-5717-4562-b3fc-2c963f66afa6
+Accept: application/json

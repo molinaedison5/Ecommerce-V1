@@ -7,6 +7,8 @@ namespace Ecommerce_V1.Interfaces
         Task<List<GetAllProducts>> GetAllProducts();
         Task<GetByIdProduct?> GetProductById(Guid id);
         Task<GetByIdProduct> CreateProduct(CreateProduct product);
+        Task<GetByIdProduct?> UpdateProduct(Guid id, UpdateProduct product);
+        Task<bool> DeleteProduct(Guid id);
 
     }
 }
